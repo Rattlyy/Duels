@@ -1,6 +1,8 @@
 package it.rattly.duels;
 
+import it.rattly.duels.commands.CommandManager;
 import it.rattly.duels.database.DatabaseProvider;
+import it.rattly.duels.listeners.ListenerRegistrator;
 import it.rattly.duels.player.PlayerManager;
 import it.rattly.duels.plugin.DuelsPlugin;
 import it.rattly.duels.utils.Scheduler;
@@ -21,6 +23,8 @@ public class Duels implements Toggleable {
     // Toggleables
     private final DatabaseProvider databaseProvider;
     private final PlayerManager playerManager;
+    private final CommandManager commandManager;
+    private final ListenerRegistrator listenerRegistrator;
 
     // Latch
     private final CountDownLatch enableLatch = new CountDownLatch(1);
@@ -29,14 +33,18 @@ public class Duels implements Toggleable {
         this.plugin = plugin;
         this.scheduler = new Scheduler(plugin);
 
+        this.commandManager = new CommandManager(this);
         this.databaseProvider = new DatabaseProvider(this, plugin.getConfig());
         this.playerManager = new PlayerManager(this);
+        this.listenerRegistrator = new ListenerRegistrator(this);
     }
 
     @Override
     public void enable() throws Exception {
         databaseProvider.enable();
         playerManager.enable();
+        commandManager.enable();
+        listenerRegistrator.enable();
 
         enableLatch.countDown();
     }

@@ -4,7 +4,6 @@ import it.rattly.duels.Duels;
 import it.rattly.duels.commands.AbstractCommand;
 import it.rattly.duels.player.DuelsPlayer;
 import it.rattly.duels.utils.Palette;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -16,9 +15,9 @@ import java.util.List;
 
 import static net.kyori.adventure.text.Component.text;
 
-public class DuelCommand extends AbstractCommand {
-    public DuelCommand(Duels duels) {
-        super(duels, "duel");
+public class DuelAcceptCommand extends AbstractCommand {
+    public DuelAcceptCommand(Duels duels) {
+        super(duels, "duelaccept");
     }
 
     @Override
@@ -36,7 +35,7 @@ public class DuelCommand extends AbstractCommand {
         if (args.length < 1) {
             sender.sendMessage(
                     text().append(
-                            text("Usage: /duel <name> [kit]")
+                            text("Usage: /duelaccept <name>")
                     ).color(Palette.ERROR)
             );
 
@@ -47,25 +46,26 @@ public class DuelCommand extends AbstractCommand {
         if (target == null) {
             sender.sendMessage(
                     text().append(
-                            text("The person you want to duel is offline or non-existant.")
+                            text("The person you mentioned is offline or non-existant.")
                     ).color(Palette.ERROR)
             );
 
             return true;
         }
 
-        DuelsPlayer duelsTarget = duels.getPlayerManager().getPlayer(target);
-        if (duelsTarget.isInvitedBy(player.getUniqueId())) {
+        DuelsPlayer duelsPlayer = duels.getPlayerManager().getPlayer(player);
+        if (duelsPlayer.isInvitedBy(target.getUniqueId())) {
+            duelsPlayer.acceptInvite(duelsPlayer.getInviteBy(target.getUniqueId()).get());
+        } else {
             sender.sendMessage(
                     text().append(
-                            text("You have already invited this person.")
+                            text("You aren't invited by that player.")
                     ).color(Palette.ERROR)
             );
 
             return true;
         }
 
-        duelsTarget.invite(player);
         return false;
     }
 

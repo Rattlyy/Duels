@@ -7,9 +7,9 @@ import lombok.Getter;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -43,7 +43,7 @@ public final class DuelsPlayer {
     }
 
     public boolean isInvitedBy(UUID uuid) {
-        return invites.containsKey(uuid);
+        return getInviteBy(uuid).isPresent();
     }
 
     public void invite(Player sender) {
@@ -81,6 +81,25 @@ public final class DuelsPlayer {
 
             invites.remove(player.getUniqueId());
         }, 20 * 30));
+    }
+
+    public void denyInvite(Invite invite) {
+        invite.getCancelTask().cancel();
+        Player sender = Bukkit.getPlayer(invite.getSender());
+
+        if (sender != null && sender.isOnline()) {
+            sender.sendMessage(text().append(
+                    text("Your invite to "),
+                    text(player.getName()).decorate(TextDecoration.BOLD),
+                    text(" has been rejected.")
+            ).color(Palette.ERROR));
+        }
+
+        invites.remove(invite.getSender());
+    }
+
+    public void acceptInvite(Invite invite) {
+        //TODO fight magic
     }
 
     public void setWins(int wins) {
